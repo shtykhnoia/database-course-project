@@ -1,0 +1,11 @@
+databaseChangeLog:
+  - changeSet:
+      id: v1.0-initial-schema
+      author: ilya
+      comment: Initial database schema - users, roles, organizers, events, tickets, orders
+      changes:
+        - sqlFile:
+            path: db/changelog/v1.0/changelog.sql
+      rollback:
+        - sqlFile:
+            path: db/changelog/v1.0/rollback.sql
