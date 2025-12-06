@@ -1,0 +1,10 @@
+databaseChangeLog:
+  - changeSet:
+      id: 1.1-create-ticket-categories
+      author: ilya
+      changes:
+        - sqlFile:
+            path: db/changelog/v1.1/changelog.sql
+      rollback:
+        - sqlFile:
+            path: db/changelog/v1.1/rollback.sql

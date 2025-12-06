@@ -1,0 +1,10 @@
+databaseChangeLog:
+  - changeSet:
+      id: 1.2-create-orders-tables
+      author: ilya
+      changes:
+        - sqlFile:
+            path: db/changelog/v1.2/changelog.sql
+      rollback:
+        - sqlFile:
+            path: db/changelog/v1.2/rollback.sql
