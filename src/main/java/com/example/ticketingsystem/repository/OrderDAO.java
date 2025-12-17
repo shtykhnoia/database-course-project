@@ -7,8 +7,10 @@ import org.springframework.jdbc.support.GeneratedKeyHolder;
 import org.springframework.jdbc.support.KeyHolder;
 import org.springframework.stereotype.Repository;
 
+import java.math.BigDecimal;
 import java.sql.PreparedStatement;
 import java.util.List;
+import java.util.Objects;
 import java.util.Optional;
 
 @Repository
@@ -38,7 +40,7 @@ public class OrderDAO {
             return ps;
         }, keyHolder);
 
-        order.setId(keyHolder.getKey().longValue());
+        order.setId(Objects.requireNonNull(keyHolder.getKey()).longValue());
         return order;
     }
 
@@ -70,5 +72,15 @@ public class OrderDAO {
                 """;
         jdbcTemplate.update(query, status, id);
         return findById(id).orElseThrow();
+    }
+
+    public Order updateTotalAmount(Long orderId, BigDecimal newPrice) {
+        String query = """
+                UPDATE orders
+                SET total_amount = ?
+                WHERE id = ?
+                """;
+        jdbcTemplate.update(query, newPrice, orderId);
+        return findById(orderId).orElseThrow();
     }
 }

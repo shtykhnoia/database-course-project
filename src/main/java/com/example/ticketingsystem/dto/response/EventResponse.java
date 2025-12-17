@@ -11,7 +11,9 @@ public class EventResponse {
     private String title;
     private String description;
     private Long organizerId;
+    private Long venueId;
     private LocalDateTime startDatetime;
+    private LocalDateTime endDatetime;
     private String eventStatus;
 
     public EventResponse(Event event) {
@@ -19,7 +21,9 @@ public class EventResponse {
         this.title = event.getTitle();
         this.description = event.getDescription();
         this.organizerId = event.getOrganizerId();
+        this.venueId = event.getVenueId();
         this.startDatetime = event.getStartDatetime();
+        this.endDatetime = event.getEndDatetime();
         this.eventStatus = event.getEventStatus();
     }
 }

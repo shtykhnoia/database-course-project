@@ -39,7 +39,7 @@ public class OrderService {
         userDAO.getUserById(userId)
                 .orElseThrow(() -> new ResourceNotFoundException("User", userId));
 
-        TicketCategory category = ticketCategoryDAO.findByIdForUpdate(ticketCategoryId)
+        TicketCategory category = ticketCategoryDAO.findById(ticketCategoryId)
                 .orElseThrow(() -> new ResourceNotFoundException("Ticket Category", ticketCategoryId));
 
         validateTicketPurchase(category, quantity);
@@ -114,7 +114,7 @@ public class OrderService {
 
         List<OrderItem> orderItems = orderItemDAO.findByOrderId(orderId);
         for (OrderItem item : orderItems) {
-            TicketCategory category = ticketCategoryDAO.findByIdForUpdate(item.getTicketCategoryId())
+            TicketCategory category = ticketCategoryDAO.findById(item.getTicketCategoryId())
                     .orElseThrow(() -> new ResourceNotFoundException("Ticket Category", item.getTicketCategoryId()));
 
             category.setQuantityAvailable(category.getQuantityAvailable() + item.getQuantity());

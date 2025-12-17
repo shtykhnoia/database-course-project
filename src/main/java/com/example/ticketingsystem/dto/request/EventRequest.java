@@ -19,10 +19,14 @@ public class EventRequest {
     @NotNull(message = "Organizer ID is required")
     private Long organizerId;
 
+    private Long venueId;
+
     @NotNull(message = "Start datetime is required")
     private LocalDateTime startDatetime;
 
-    @Pattern(regexp = "draft|published|cancelled", message = "Status must be one of: draft, published, cancelled")
+    private LocalDateTime endDatetime;
+
+    @Pattern(regexp = "draft|published|cancelled|completed", message = "Status must be one of: draft, published, cancelled, completed")
     @Size(max = 20, message = "Status must not exceed 20 characters")
     private String eventStatus;
 }

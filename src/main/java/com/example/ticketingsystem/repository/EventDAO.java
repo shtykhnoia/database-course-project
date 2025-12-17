@@ -26,7 +26,9 @@ public class EventDAO {
                 title,
                 description,
                 organizer_id,
+                venue_id,
                 start_datetime,
+                end_datetime,
                 event_status
                 FROM events
                 """;
@@ -39,7 +41,9 @@ public class EventDAO {
                 title,
                 description,
                 organizer_id,
+                venue_id,
                 start_datetime,
+                end_datetime,
                 event_status
                 FROM events
                 WHERE id=?
@@ -50,8 +54,8 @@ public class EventDAO {
 
     public Event createEvent(Event event) {
         String query = """
-                INSERT INTO events (title, description, organizer_id, start_datetime, event_status)
-                VALUES(?, ?, ?, ?, ?)
+                INSERT INTO events (title, description, organizer_id, venue_id, start_datetime, end_datetime, event_status)
+                VALUES(?, ?, ?, ?, ?, ?, ?)
                 """;
         KeyHolder keyHolder = new GeneratedKeyHolder();
         jdbcTemplate.update(con -> {
@@ -59,8 +63,10 @@ public class EventDAO {
             ps.setString(1, event.getTitle());
             ps.setString(2, event.getDescription());
             ps.setLong(3, event.getOrganizerId());
-            ps.setObject(4, event.getStartDatetime());
-            ps.setString(5, event.getEventStatus());
+            ps.setObject(4, event.getVenueId());
+            ps.setObject(5, event.getStartDatetime());
+            ps.setObject(6, event.getEndDatetime());
+            ps.setString(7, event.getEventStatus());
             return ps;
         }, keyHolder);
         event.setId(keyHolder.getKey().longValue());
@@ -73,7 +79,9 @@ public class EventDAO {
                 SET title = ?,
                     description = ?,
                     organizer_id = ?,
+                    venue_id = ?,
                     start_datetime = ?,
+                    end_datetime = ?,
                     event_status = ?
                 WHERE id = ?
                 """;
@@ -81,7 +89,9 @@ public class EventDAO {
                 event.getTitle(),
                 event.getDescription(),
                 event.getOrganizerId(),
+                event.getVenueId(),
                 event.getStartDatetime(),
+                event.getEndDatetime(),
                 event.getEventStatus(),
                 event.getId());
         return event;
@@ -103,7 +113,7 @@ public class EventDAO {
 
     public List<Event> getEventsByOrganizerId(Long organizerId) {
         String query = """
-                SELECT id, title, description, organizer_id, start_datetime, event_status
+                SELECT id, title, description, organizer_id, venue_id, start_datetime, end_datetime, event_status
                 FROM events
                 WHERE organizer_id = ?
                 ORDER BY start_datetime DESC
@@ -113,11 +123,21 @@ public class EventDAO {
 
     public List<Event> getEventsByStatus(String status) {
         String query = """
-                SELECT id, title, description, organizer_id, start_datetime, event_status
+                SELECT id, title, description, organizer_id, venue_id, start_datetime, end_datetime, event_status
                 FROM events
                 WHERE event_status = ?
                 ORDER BY start_datetime DESC
                 """;
         return jdbcTemplate.query(query, new EventRowMapper(), status);
+    }
+
+    public List<Event> getEventsByTicketCategoryId(Long ticketCategoryId) {
+        String query = """
+                SELECT e.id, e.title, e.description, e.organizer_id, e.start_datetime, e.event_status, e.venue_id, e.end_datetime
+                FROM events e
+                JOIN ticket_categories tc ON e.id = tc.event_id
+                WHERE tc.id = ?
+                """;
+        return jdbcTemplate.query(query, new EventRowMapper(), ticketCategoryId);
     }
 }

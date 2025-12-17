@@ -14,6 +14,8 @@ public class Event {
     private String title;
     private String description;
     private Long organizerId;
+    private Long venueId;
     private LocalDateTime startDatetime;
+    private LocalDateTime endDatetime;
     private String eventStatus;
 }

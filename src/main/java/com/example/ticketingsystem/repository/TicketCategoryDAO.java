@@ -26,7 +26,7 @@ public class TicketCategoryDAO {
                        sale_start_date, sale_end_date
                 FROM ticket_categories
                 WHERE event_id = ?
-                ORDER BY price ASC
+                ORDER BY price
                 """;
         return jdbcTemplate.query(query, new TicketCategoryRowMapper(), eventId);
     }
@@ -94,18 +94,6 @@ public class TicketCategoryDAO {
     public void delete(Long id) {
         String query = "DELETE FROM ticket_categories WHERE id = ?";
         jdbcTemplate.update(query, id);
-    }
-
-    public Optional<TicketCategory> findByIdForUpdate(Long id) {
-        String query = """
-                SELECT id, event_id, name, description, price, quantity_available,
-                       sale_start_date, sale_end_date
-                FROM ticket_categories
-                WHERE id = ?
-                FOR UPDATE
-                """;
-        List<TicketCategory> results = jdbcTemplate.query(query, new TicketCategoryRowMapper(), id);
-        return results.isEmpty() ? Optional.empty() : Optional.of(results.getFirst());
     }
 
     public int decreaseQuantity(Long id, int quantity) {

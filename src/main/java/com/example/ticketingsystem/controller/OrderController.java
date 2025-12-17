@@ -1,5 +1,6 @@
 package com.example.ticketingsystem.controller;
 
+import com.example.ticketingsystem.dto.request.ApplyPromoCodeRequest;
 import com.example.ticketingsystem.dto.request.CreateOrderRequest;
 import com.example.ticketingsystem.dto.request.PaymentRequest;
 import com.example.ticketingsystem.dto.response.OrderResponse;
@@ -7,7 +8,9 @@ import com.example.ticketingsystem.dto.response.TicketResponse;
 import com.example.ticketingsystem.model.Order;
 import com.example.ticketingsystem.model.Ticket;
 import com.example.ticketingsystem.service.OrderService;
+import com.example.ticketingsystem.service.PromoCodeService;
 import jakarta.validation.Valid;
+import lombok.AllArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -16,13 +19,11 @@ import java.util.List;
 
 @RestController
 @RequestMapping("/api/orders")
+@AllArgsConstructor
 public class OrderController {
 
     private final OrderService orderService;
-
-    public OrderController(OrderService orderService) {
-        this.orderService = orderService;
-    }
+    private final PromoCodeService promoCodeService;
 
     @PostMapping
     public ResponseEntity<OrderResponse> createOrder(@Valid @RequestBody CreateOrderRequest request) {
@@ -70,5 +71,13 @@ public class OrderController {
                 .map(TicketResponse::new)
                 .toList();
         return ResponseEntity.ok(responses);
+    }
+
+    @PostMapping("/{orderId}/apply-promo")
+    public ResponseEntity<OrderResponse> applyPromo(@PathVariable Long orderId,
+                                                    @Valid @RequestBody ApplyPromoCodeRequest request) {
+        promoCodeService.applyPromoCode(request.getCode(), orderId);
+        Order updatedOrder = orderService.getOrderById(orderId);
+        return ResponseEntity.ok(new OrderResponse(updatedOrder));
     }
 }

@@ -12,7 +12,9 @@ public class EventMapper {
         event.setTitle(request.getTitle());
         event.setDescription(request.getDescription());
         event.setOrganizerId(request.getOrganizerId());
+        event.setVenueId(request.getVenueId());
         event.setStartDatetime(request.getStartDatetime());
+        event.setEndDatetime(request.getEndDatetime());
         event.setEventStatus(request.getEventStatus());
         return event;
     }
@@ -21,7 +23,9 @@ public class EventMapper {
         event.setTitle(request.getTitle());
         event.setDescription(request.getDescription());
         event.setOrganizerId(request.getOrganizerId());
+        event.setVenueId(request.getVenueId());
         event.setStartDatetime(request.getStartDatetime());
+        event.setEndDatetime(request.getEndDatetime());
         event.setEventStatus(request.getEventStatus());
     }
 }
