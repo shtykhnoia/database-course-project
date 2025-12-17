@@ -111,4 +111,37 @@ public class UserDAO {
                 """;
         jdbcTemplate.update(query, userId, roleName);
     }
+
+    public void removeRole(Long userId, String roleName) {
+        String query = """
+                DELETE FROM user_roles
+                WHERE user_id = ? AND role_id = (SELECT id FROM roles WHERE name = ?)
+                """;
+        jdbcTemplate.update(query, userId, roleName);
+    }
+
+    public User update(User user) {
+        String query = """
+                UPDATE users
+                SET username = ?,
+                    email = ?,
+                    first_name = ?,
+                    last_name = ?
+                WHERE id = ?
+                """;
+
+        jdbcTemplate.update(query,
+                user.getUsername(),
+                user.getEmail(),
+                user.getFirstName(),
+                user.getLastName(),
+                user.getId());
+
+        return user;
+    }
+
+    public void delete(Long id) {
+        String query = "DELETE FROM users WHERE id = ?";
+        jdbcTemplate.update(query, id);
+    }
 }

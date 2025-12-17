@@ -69,4 +69,45 @@ public class UserService {
 
         return createdUser;
     }
+
+    @Transactional
+    public User updateUser(Long id, User user) {
+        User existing = userDAO.getUserById(id)
+                .orElseThrow(() -> new RuntimeException("User not found with id: " + id));
+
+        if (!existing.getEmail().equals(user.getEmail()) &&
+                userDAO.findByEmail(user.getEmail()).isPresent()) {
+            throw new DuplicateResourceException("Email", user.getEmail());
+        }
+
+        if (!existing.getUsername().equals(user.getUsername()) &&
+                userDAO.findByUsername(user.getUsername()).isPresent()) {
+            throw new DuplicateResourceException("Username", user.getUsername());
+        }
+
+        user.setId(id);
+        user.setPasswordHash(existing.getPasswordHash());
+        user.setCreatedAt(existing.getCreatedAt());
+
+        return userDAO.update(user);
+    }
+
+    @Transactional
+    public void deleteUser(Long id) {
+        userDAO.getUserById(id)
+                .orElseThrow(() -> new RuntimeException("User not found with id: " + id));
+        userDAO.delete(id);
+    }
+
+    public void assignRole(Long userId, String roleName) {
+        userDAO.getUserById(userId)
+                .orElseThrow(() -> new RuntimeException("User not found with id: " + userId));
+        userDAO.assignRole(userId, roleName);
+    }
+
+    public void removeRole(Long userId, String roleName) {
+        userDAO.getUserById(userId)
+                .orElseThrow(() -> new RuntimeException("User not found with id: " + userId));
+        userDAO.removeRole(userId, roleName);
+    }
 }

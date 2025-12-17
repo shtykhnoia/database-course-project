@@ -1,0 +1,10 @@
+databaseChangeLog:
+  - changeSet:
+      id: 1.5-create-audit-log-triggers
+      author: ilya
+      changes:
+        - sqlFile:
+            path: db/changelog/v1.5/changelog.sql
+      rollback:
+        - sqlFile:
+            path: db/changelog/v1.5/rollback.sql

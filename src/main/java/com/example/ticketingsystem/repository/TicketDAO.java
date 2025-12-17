@@ -42,6 +42,16 @@ public class TicketDAO {
         return ticket;
     }
 
+    public int[] batchUpdateStatus(List<Long> ticketIds, String newStatus) {
+        String query = "UPDATE tickets SET status = ? WHERE id = ?";
+
+        return jdbcTemplate.batchUpdate(query, ticketIds, ticketIds.size(),
+                (PreparedStatement ps, Long ticketId) -> {
+                    ps.setString(1, newStatus);
+                    ps.setLong(2, ticketId);
+                });
+    }
+
     public List<Ticket> findByOrderItemId(Long orderItemId) {
         String query = """
                 SELECT id, ticket_code, order_item_id, attendee_name, attendee_email, status
@@ -49,6 +59,17 @@ public class TicketDAO {
                 WHERE order_item_id = ?
                 """;
         return jdbcTemplate.query(query, new TicketRowMapper(), orderItemId);
+    }
+
+    public List<Ticket> findByEventId(Long eventId) {
+        String query = """
+                SELECT t.id, t.ticket_code, t.order_item_id, t.attendee_name, t.attendee_email, t.status
+                FROM tickets t
+                JOIN order_items oi ON t.order_item_id = oi.id
+                JOIN ticket_categories tc ON oi.ticket_category_id = tc.id
+                WHERE tc.event_id = ?
+                """;
+        return jdbcTemplate.query(query, new TicketRowMapper(), eventId);
     }
 
     public Optional<Ticket> findByTicketCode(String ticketCode) {

@@ -25,6 +25,20 @@ public class OrderController {
     private final OrderService orderService;
     private final PromoCodeService promoCodeService;
 
+    @GetMapping
+    public ResponseEntity<List<OrderResponse>> getAllOrders(@RequestParam(required = false) String status) {
+        List<Order> orders;
+        if (status != null) {
+            orders = orderService.getOrdersByStatus(status);
+        } else {
+            orders = orderService.getAllOrders();
+        }
+        List<OrderResponse> responses = orders.stream()
+                .map(OrderResponse::new)
+                .toList();
+        return ResponseEntity.ok(responses);
+    }
+
     @PostMapping
     public ResponseEntity<OrderResponse> createOrder(@Valid @RequestBody CreateOrderRequest request) {
         Order order = orderService.createOrder(

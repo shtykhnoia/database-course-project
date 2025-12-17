@@ -3,6 +3,7 @@ package com.example.ticketingsystem.service;
 import com.example.ticketingsystem.exception.ResourceNotFoundException;
 import com.example.ticketingsystem.model.*;
 import com.example.ticketingsystem.repository.*;
+import lombok.AllArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Isolation;
 import org.springframework.transaction.annotation.Transactional;
@@ -14,6 +15,7 @@ import java.util.List;
 import java.util.UUID;
 
 @Service
+@AllArgsConstructor
 public class OrderService {
 
     private final OrderDAO orderDAO;
@@ -22,17 +24,6 @@ public class OrderService {
     private final TicketDAO ticketDAO;
     private final TicketCategoryDAO ticketCategoryDAO;
     private final UserDAO userDAO;
-
-    public OrderService(OrderDAO orderDAO, OrderItemDAO orderItemDAO,
-                       PaymentDAO paymentDAO, TicketDAO ticketDAO,
-                       TicketCategoryDAO ticketCategoryDAO, UserDAO userDAO) {
-        this.orderDAO = orderDAO;
-        this.orderItemDAO = orderItemDAO;
-        this.paymentDAO = paymentDAO;
-        this.ticketDAO = ticketDAO;
-        this.ticketCategoryDAO = ticketCategoryDAO;
-        this.userDAO = userDAO;
-    }
 
     @Transactional(isolation = Isolation.SERIALIZABLE)
     public Order createOrder(Long userId, Long ticketCategoryId, int quantity) {
@@ -137,8 +128,16 @@ public class OrderService {
                 .orElseThrow(() -> new ResourceNotFoundException("Order", orderId));
     }
 
+    public List<Order> getAllOrders() {
+        return orderDAO.findAll();
+    }
+
     public List<Order> getUserOrders(Long userId) {
         return orderDAO.findByUserId(userId);
+    }
+
+    public List<Order> getOrdersByStatus(String status) {
+        return orderDAO.findByStatus(status);
     }
 
     public List<Ticket> getOrderTickets(Long orderId) {

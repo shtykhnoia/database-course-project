@@ -69,9 +69,17 @@ public class PromoCodeService {
         orderDAO.updateTotalAmount(orderId, newPrice);
     }
 
+    public PromoCode updatePromoCode(Long id, PromoCode promoCode) {
+        promoCodeDAO.findById(id)
+                .orElseThrow(() -> new ResourceNotFoundException("Promo code", id));
+
+        promoCode.setId(id);
+        return promoCodeDAO.update(promoCode);
+    }
+
     @Transactional
     public void deletePromoCode(Long id) {
-        int deleted = promoCodeDAO.deletePromoCode(id);  // вернуть int из DAO
+        int deleted = promoCodeDAO.deletePromoCode(id);
         if (deleted == 0) {
             throw new ResourceNotFoundException("Promo code", id);
         }

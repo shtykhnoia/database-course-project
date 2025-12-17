@@ -81,6 +81,32 @@ public class PromoCodeDAO {
         return jdbcTemplate.update(query, id);
     }
 
+    public PromoCode update(PromoCode promoCode) {
+        String query = """
+                UPDATE promo_codes
+                SET code = ?,
+                    event_id = ?,
+                    discount_type = ?,
+                    discount_value = ?,
+                    max_uses = ?,
+                    valid_from = ?,
+                    valid_until = ?
+                WHERE id = ?
+                """;
+
+        jdbcTemplate.update(query,
+                promoCode.getCode(),
+                promoCode.getEventId(),
+                promoCode.getDiscountType(),
+                promoCode.getDiscountValue(),
+                promoCode.getMaxUses(),
+                promoCode.getValidFrom(),
+                promoCode.getValidUntil(),
+                promoCode.getId());
+
+        return promoCode;
+    }
+
     public int deletePromoCode(Long id) {
         String query = """
                 DELETE FROM promo_codes

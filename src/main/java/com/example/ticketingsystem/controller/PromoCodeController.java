@@ -56,6 +56,15 @@ public class PromoCodeController {
         return ResponseEntity.ok(new PromoCodeResponse(promoCode));
     }
 
+    @PutMapping("/{id}")
+    public ResponseEntity<PromoCodeResponse> updatePromoCode(
+            @PathVariable Long id,
+            @Valid @RequestBody PromoCodeRequest request) {
+        PromoCode promoCode = mapper.toEntity(request);
+        PromoCode updated = promoCodeService.updatePromoCode(id, promoCode);
+        return ResponseEntity.ok(new PromoCodeResponse(updated));
+    }
+
     @DeleteMapping("/{id}")
     public ResponseEntity<Void> deletePromoCode(@PathVariable Long id) {
         promoCodeService.deletePromoCode(id);
