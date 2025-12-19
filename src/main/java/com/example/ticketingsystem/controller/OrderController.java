@@ -41,11 +41,7 @@ public class OrderController {
 
     @PostMapping
     public ResponseEntity<OrderResponse> createOrder(@Valid @RequestBody CreateOrderRequest request) {
-        Order order = orderService.createOrder(
-                request.getUserId(),
-                request.getTicketCategoryId(),
-                request.getQuantity()
-        );
+        Order order = orderService.createOrder(request.getUserId(), request.getItems());
         return ResponseEntity.status(HttpStatus.CREATED).body(new OrderResponse(order));
     }
 

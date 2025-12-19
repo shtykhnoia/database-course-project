@@ -1,5 +1,6 @@
 package com.example.ticketingsystem.service;
 
+import com.example.ticketingsystem.dto.request.OrderItemRequest;
 import com.example.ticketingsystem.exception.ResourceNotFoundException;
 import com.example.ticketingsystem.model.*;
 import com.example.ticketingsystem.repository.*;
@@ -26,21 +27,33 @@ public class OrderService {
     private final UserDAO userDAO;
 
     @Transactional(isolation = Isolation.SERIALIZABLE)
-    public Order createOrder(Long userId, Long ticketCategoryId, int quantity) {
+    public Order createOrder(Long userId, List<OrderItemRequest> items) {
         userDAO.getUserById(userId)
                 .orElseThrow(() -> new ResourceNotFoundException("User", userId));
 
-        TicketCategory category = ticketCategoryDAO.findById(ticketCategoryId)
-                .orElseThrow(() -> new ResourceNotFoundException("Ticket Category", ticketCategoryId));
+        BigDecimal totalAmount = BigDecimal.ZERO;
+        List<ValidatedOrderItem> validatedItems = new ArrayList<>();
 
-        validateTicketPurchase(category, quantity);
+        for (OrderItemRequest itemRequest : items) {
+            TicketCategory category = ticketCategoryDAO.findById(itemRequest.getTicketCategoryId())
+                    .orElseThrow(() -> new ResourceNotFoundException("Ticket Category", itemRequest.getTicketCategoryId()));
 
-        int updatedRows = ticketCategoryDAO.decreaseQuantity(ticketCategoryId, quantity);
-        if (updatedRows == 0) {
-            throw new IllegalStateException("Not enough tickets available");
+            validateTicketPurchase(category, itemRequest.getQuantity());
+
+            int updatedRows = ticketCategoryDAO.decreaseQuantity(itemRequest.getTicketCategoryId(), itemRequest.getQuantity());
+            if (updatedRows == 0) {
+                throw new IllegalStateException("Not enough tickets available for category: " + category.getName());
+            }
+
+            BigDecimal itemTotal = category.getPrice().multiply(BigDecimal.valueOf(itemRequest.getQuantity()));
+            totalAmount = totalAmount.add(itemTotal);
+
+            validatedItems.add(new ValidatedOrderItem(
+                    itemRequest.getTicketCategoryId(),
+                    itemRequest.getQuantity(),
+                    category.getPrice()
+            ));
         }
-
-        BigDecimal totalAmount = category.getPrice().multiply(BigDecimal.valueOf(quantity));
 
         Order order = new Order();
         order.setOrderNumber(generateOrderNumber());
@@ -50,12 +63,14 @@ public class OrderService {
         order.setCreatedAt(LocalDateTime.now());
         order = orderDAO.create(order);
 
-        OrderItem orderItem = new OrderItem();
-        orderItem.setOrderId(order.getId());
-        orderItem.setTicketCategoryId(ticketCategoryId);
-        orderItem.setQuantity(quantity);
-        orderItem.setUnitPrice(category.getPrice());
-        orderItemDAO.create(orderItem);
+        for (ValidatedOrderItem validated : validatedItems) {
+            OrderItem orderItem = new OrderItem();
+            orderItem.setOrderId(order.getId());
+            orderItem.setTicketCategoryId(validated.ticketCategoryId());
+            orderItem.setQuantity(validated.quantity());
+            orderItem.setUnitPrice(validated.unitPrice());
+            orderItemDAO.create(orderItem);
+        }
 
         Payment payment = new Payment();
         payment.setOrderId(order.getId());
@@ -65,6 +80,8 @@ public class OrderService {
 
         return order;
     }
+
+    private record ValidatedOrderItem(Long ticketCategoryId, Integer quantity, BigDecimal unitPrice) {}
 
     @Transactional
     public Order processPayment(Long orderId, String externalPaymentId) {
