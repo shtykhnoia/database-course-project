@@ -15,6 +15,7 @@ public class OrderItemRowMapper implements RowMapper<OrderItem> {
         orderItem.setTicketCategoryId(rs.getLong("ticket_category_id"));
         orderItem.setQuantity(rs.getInt("quantity"));
         orderItem.setUnitPrice(rs.getBigDecimal("unit_price"));
+        orderItem.setPromoCodeId(rs.getObject("promo_code_id", Long.class));
         return orderItem;
     }
 }

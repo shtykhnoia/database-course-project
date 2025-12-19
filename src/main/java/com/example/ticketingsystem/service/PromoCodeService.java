@@ -38,7 +38,18 @@ public class PromoCodeService {
                 () -> new ResourceNotFoundException("Order not found")
         );
 
+        if (!"pending".equals(order.getStatus())) {
+            throw new IllegalStateException("Cannot apply promo code to order with status: " + order.getStatus());
+        }
+
         List<OrderItem> orderItems = orderItemDAO.findByOrderId(orderId);
+
+        boolean alreadyApplied = orderItems.stream()
+                .anyMatch(item -> item.getPromoCodeId() != null);
+        if (alreadyApplied) {
+            throw new IllegalArgumentException("Promo code already applied to this order");
+        }
+
         List<OrderItem> discountItems = orderItems.stream()
                 .filter(it -> {
                     TicketCategory category = ticketCategoryDAO.findById(it.getTicketCategoryId())
@@ -49,23 +60,44 @@ public class PromoCodeService {
                 })
                 .toList();
         if (discountItems.isEmpty()) {
-            throw new IllegalArgumentException("Promo code is not acceptable to any items in order");
+            throw new IllegalArgumentException("Promo code is not applicable to any items in order");
         }
-        validatePromoCode(promoCode);
-        int updated = promoCodeDAO.incrementUsedCount(promoCode.getId());
 
+        validatePromoCode(promoCode);
+
+        int updated = promoCodeDAO.incrementUsedCount(promoCode.getId());
         if (updated == 0) {
             throw new IllegalArgumentException("Promo code usage limit exceeded");
         }
 
         BigDecimal totalDiscount = BigDecimal.ZERO;
-        for (OrderItem item: discountItems) {
-            BigDecimal itemTotal = item.getUnitPrice().multiply(BigDecimal.valueOf(item.getQuantity()));
-            BigDecimal itemDiscount = calculateDiscount(promoCode, itemTotal);
-            totalDiscount = totalDiscount.add(itemDiscount);
+
+        if ("fixed".equals(promoCode.getDiscountType())) {
+            BigDecimal fixedDiscount = promoCode.getDiscountValue();
+            for (int i = 0; i < discountItems.size(); i++) {
+                OrderItem item = discountItems.get(i);
+                orderItemDAO.updatePromoCodeId(item.getId(), promoCode.getId());
+
+                if (i == 0) {
+                    BigDecimal itemTotal = item.getUnitPrice().multiply(BigDecimal.valueOf(item.getQuantity()));
+                    totalDiscount = fixedDiscount.min(itemTotal);
+                }
+            }
+        } else {
+            for (OrderItem item : discountItems) {
+                orderItemDAO.updatePromoCodeId(item.getId(), promoCode.getId());
+
+                BigDecimal itemTotal = item.getUnitPrice().multiply(BigDecimal.valueOf(item.getQuantity()));
+                BigDecimal itemDiscount = calculateDiscount(promoCode, itemTotal);
+                totalDiscount = totalDiscount.add(itemDiscount);
+            }
         }
 
         BigDecimal newPrice = order.getTotalAmount().subtract(totalDiscount);
+        if (newPrice.compareTo(BigDecimal.ZERO) < 0) {
+            newPrice = BigDecimal.ZERO;
+        }
+
         orderDAO.updateTotalAmount(orderId, newPrice);
     }
 

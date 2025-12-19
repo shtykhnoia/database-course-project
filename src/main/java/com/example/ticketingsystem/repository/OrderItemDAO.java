@@ -42,10 +42,19 @@ public class OrderItemDAO {
 
     public List<OrderItem> findByOrderId(Long orderId) {
         String query = """
-                SELECT id, order_id, ticket_category_id, quantity, unit_price
+                SELECT id, order_id, ticket_category_id, quantity, unit_price, promo_code_id
                 FROM order_items
                 WHERE order_id = ?
                 """;
         return jdbcTemplate.query(query, new OrderItemRowMapper(), orderId);
+    }
+
+    public void updatePromoCodeId(Long orderItemId, Long promoCodeId) {
+        String query = """
+                UPDATE order_items
+                SET promo_code_id = ?
+                WHERE id = ?
+                """;
+        jdbcTemplate.update(query, promoCodeId, orderItemId);
     }
 }

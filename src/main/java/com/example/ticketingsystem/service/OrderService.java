@@ -25,6 +25,7 @@ public class OrderService {
     private final TicketDAO ticketDAO;
     private final TicketCategoryDAO ticketCategoryDAO;
     private final UserDAO userDAO;
+    private final PromoCodeDAO promoCodeDAO;
 
     @Transactional(isolation = Isolation.SERIALIZABLE)
     public Order createOrder(Long userId, List<OrderItemRequest> items) {
@@ -116,17 +117,36 @@ public class OrderService {
         Order order = orderDAO.findById(orderId)
                 .orElseThrow(() -> new ResourceNotFoundException("Order", orderId));
 
-        if ("cancelled".equals(order.getStatus()) || "confirmed".equals(order.getStatus())) {
-            throw new IllegalStateException("Cannot cancel order with status: " + order.getStatus());
+        if ("cancelled".equals(order.getStatus())) {
+            throw new IllegalStateException("Order is already cancelled");
+        }
+
+        if ("confirmed".equals(order.getStatus())) {
+            List<Ticket> tickets = getOrderTickets(orderId);
+            for (Ticket ticket : tickets) {
+                if ("checked_in".equals(ticket.getStatus())) {
+                    throw new IllegalStateException("Cannot cancel order with checked-in tickets");
+                }
+            }
         }
 
         List<OrderItem> orderItems = orderItemDAO.findByOrderId(orderId);
-        for (OrderItem item : orderItems) {
-            TicketCategory category = ticketCategoryDAO.findById(item.getTicketCategoryId())
-                    .orElseThrow(() -> new ResourceNotFoundException("Ticket Category", item.getTicketCategoryId()));
 
-            category.setQuantityAvailable(category.getQuantityAvailable() + item.getQuantity());
-            ticketCategoryDAO.update(category);
+        for (OrderItem item : orderItems) {
+            int updated = ticketCategoryDAO.increaseQuantity(item.getTicketCategoryId(), item.getQuantity());
+            if (updated == 0) {
+                throw new IllegalStateException("Ticket category not found: " + item.getTicketCategoryId());
+            }
+
+            if (item.getPromoCodeId() != null) {
+                promoCodeDAO.decrementUsedCount(item.getPromoCodeId());
+            }
+        }
+
+        List<Ticket> tickets = getOrderTickets(orderId);
+        if (!tickets.isEmpty()) {
+            List<Long> ticketIds = tickets.stream().map(Ticket::getId).toList();
+            ticketDAO.batchUpdateStatus(ticketIds, "cancelled");
         }
 
         order.setStatus("cancelled");

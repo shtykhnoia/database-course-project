@@ -104,4 +104,13 @@ public class TicketCategoryDAO {
                 """;
         return jdbcTemplate.update(query, quantity, id, quantity);
     }
+
+    public int increaseQuantity(Long id, int quantity) {
+        String query = """
+                UPDATE ticket_categories
+                SET quantity_available = quantity_available + ?
+                WHERE id = ?
+                """;
+        return jdbcTemplate.update(query, quantity, id);
+    }
 }

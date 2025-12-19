@@ -15,4 +15,5 @@ public class OrderItem {
     private Long ticketCategoryId;
     private Integer quantity;
     private BigDecimal unitPrice;
+    private Long promoCodeId;
 }

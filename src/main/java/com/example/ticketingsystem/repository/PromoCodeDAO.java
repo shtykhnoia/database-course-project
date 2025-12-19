@@ -81,6 +81,15 @@ public class PromoCodeDAO {
         return jdbcTemplate.update(query, id);
     }
 
+    public int decrementUsedCount(Long id) {
+        String query = """
+                UPDATE promo_codes
+                SET used_count = used_count - 1
+                WHERE id = ? AND used_count > 0
+                """;
+        return jdbcTemplate.update(query, id);
+    }
+
     public PromoCode update(PromoCode promoCode) {
         String query = """
                 UPDATE promo_codes
