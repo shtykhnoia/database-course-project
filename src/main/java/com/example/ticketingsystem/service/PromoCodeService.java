@@ -102,8 +102,14 @@ public class PromoCodeService {
     }
 
     public PromoCode updatePromoCode(Long id, PromoCode promoCode) {
-        promoCodeDAO.findById(id)
+        PromoCode existing = promoCodeDAO.findById(id)
                 .orElseThrow(() -> new ResourceNotFoundException("Promo code", id));
+
+        if (promoCode.getMaxUses() != null && promoCode.getMaxUses() < existing.getUsedCount()) {
+            throw new IllegalArgumentException(
+                    "max_uses (" + promoCode.getMaxUses() + ") cannot be less than current used_count (" + existing.getUsedCount() + ")"
+            );
+        }
 
         promoCode.setId(id);
         return promoCodeDAO.update(promoCode);

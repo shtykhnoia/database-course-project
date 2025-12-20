@@ -47,8 +47,19 @@ public class EventService {
     }
 
     public Event updateEvent(Long id, Event event) {
-        eventDAO.getEventById(id)
+        Event existing = eventDAO.getEventById(id)
                 .orElseThrow(() -> new ResourceNotFoundException("Event", id));
+
+        int confirmedOrders = eventDAO.countConfirmedOrdersByEventId(id);
+
+        if (confirmedOrders > 0) {
+            if (!existing.getStartDatetime().equals(event.getStartDatetime()) ||
+                    !existing.getVenueId().equals(event.getVenueId())) {
+                throw new IllegalStateException(
+                        "Cannot change date/venue for event with sold tickets. Sold tickets: " + confirmedOrders
+                );
+            }
+        }
 
         event.setId(id);
         return eventDAO.updateEvent(event);
@@ -63,6 +74,13 @@ public class EventService {
         eventDAO.getEventById(eventId)
                 .orElseThrow(() -> new ResourceNotFoundException("Event", eventId));
 
+        int confirmedOrders = eventDAO.countConfirmedOrdersByEventId(eventId);
+        if (confirmedOrders > 0) {
+            throw new IllegalStateException(
+                    "Cannot cancel event with confirmed orders. Please process refunds first. Affected orders: " + confirmedOrders
+            );
+        }
+
         eventDAO.updateEventStatus(eventId, "cancelled");
 
         List<Ticket> tickets = ticketDAO.findByEventId(eventId);
@@ -74,7 +92,16 @@ public class EventService {
         }
     }
 
+    @Transactional
     public void deleteEvent(Long id) {
+        eventDAO.getEventById(id)
+                .orElseThrow(() -> new ResourceNotFoundException("Event", id));
+
+        int orderCount = eventDAO.countOrdersByEventId(id);
+        if (orderCount > 0) {
+            throw new IllegalStateException("Cannot delete event with existing orders");
+        }
+
         eventDAO.deleteEvent(id);
     }
 }

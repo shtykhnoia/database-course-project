@@ -140,4 +140,26 @@ public class EventDAO {
                 """;
         return jdbcTemplate.query(query, new EventRowMapper(), ticketCategoryId);
     }
+
+    public int countConfirmedOrdersByEventId(Long eventId) {
+        String query = """
+                SELECT COUNT(*) FROM orders o
+                JOIN order_items oi ON o.id = oi.order_id
+                JOIN ticket_categories tc ON oi.ticket_category_id = tc.id
+                WHERE tc.event_id = ? AND o.status = 'confirmed'
+                """;
+        Integer count = jdbcTemplate.queryForObject(query, Integer.class, eventId);
+        return count != null ? count : 0;
+    }
+
+    public int countOrdersByEventId(Long eventId) {
+        String query = """
+                SELECT COUNT(*) FROM orders o
+                JOIN order_items oi ON o.id = oi.order_id
+                JOIN ticket_categories tc ON oi.ticket_category_id = tc.id
+                WHERE tc.event_id = ?
+                """;
+        Integer count = jdbcTemplate.queryForObject(query, Integer.class, eventId);
+        return count != null ? count : 0;
+    }
 }

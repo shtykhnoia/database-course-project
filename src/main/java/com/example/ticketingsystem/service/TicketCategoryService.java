@@ -4,8 +4,10 @@ import com.example.ticketingsystem.exception.ResourceNotFoundException;
 import com.example.ticketingsystem.model.Event;
 import com.example.ticketingsystem.model.TicketCategory;
 import com.example.ticketingsystem.repository.EventDAO;
+import com.example.ticketingsystem.repository.OrderItemDAO;
 import com.example.ticketingsystem.repository.TicketCategoryDAO;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDateTime;
 import java.util.List;
@@ -16,10 +18,12 @@ public class TicketCategoryService {
 
     private final TicketCategoryDAO ticketCategoryDAO;
     private final EventDAO eventDAO;
+    private final OrderItemDAO orderItemDAO;
 
-    public TicketCategoryService(TicketCategoryDAO ticketCategoryDAO, EventDAO eventDAO) {
+    public TicketCategoryService(TicketCategoryDAO ticketCategoryDAO, EventDAO eventDAO, OrderItemDAO orderItemDAO) {
         this.ticketCategoryDAO = ticketCategoryDAO;
         this.eventDAO = eventDAO;
+        this.orderItemDAO = orderItemDAO;
     }
 
     public List<TicketCategory> getTicketCategoriesByEventId(Long eventId) {
@@ -57,9 +61,16 @@ public class TicketCategoryService {
         return ticketCategoryDAO.update(ticketCategory);
     }
 
+    @Transactional
     public void deleteTicketCategory(Long id) {
         ticketCategoryDAO.findById(id)
                 .orElseThrow(() -> new ResourceNotFoundException("TicketCategory", id));
+
+        int orderCount = orderItemDAO.countByTicketCategoryId(id);
+        if (orderCount > 0) {
+            throw new IllegalStateException("Cannot delete ticket category with existing orders");
+        }
+
         ticketCategoryDAO.delete(id);
     }
 

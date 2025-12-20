@@ -14,9 +14,9 @@ public class EventSalesView {
     private String eventTitle;
     private Long categoryId;
     private String categoryName;
-    private BigDecimal categoryPrice;
-    private Integer totalSold;
-    private Integer quantityAvailable;
-    private BigDecimal totalRevenue;
-    private Integer soldLast7Days;
+    private Integer ticketsSold;
+    private Integer ticketsAvailable;
+    private BigDecimal avgTicketPrice;
+    private Integer ticketsSoldLast7Days;
+    private Integer soldPercentage;
 }

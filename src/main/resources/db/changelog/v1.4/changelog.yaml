@@ -5,6 +5,8 @@ databaseChangeLog:
       changes:
         - sqlFile:
             path: db/changelog/v1.4/changelog.sql
-rollback:
-  - sqlFile:
-      path: db/changelog/v1.4/rollback.sql
+            splitStatements: false
+      rollback:
+        - sqlFile:
+            path: db/changelog/v1.4/rollback.sql
+            splitStatements: false

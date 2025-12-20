@@ -1,10 +1,13 @@
 package com.example.ticketingsystem.service;
 
 import com.example.ticketingsystem.exception.ResourceNotFoundException;
+import com.example.ticketingsystem.model.Event;
 import com.example.ticketingsystem.model.Organizer;
+import com.example.ticketingsystem.repository.EventDAO;
 import com.example.ticketingsystem.repository.OrganizerDAO;
 import lombok.AllArgsConstructor;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 
@@ -13,6 +16,7 @@ import java.util.List;
 public class OrganizerService {
 
     private final OrganizerDAO organizerDAO;
+    private final EventDAO eventDAO;
 
     public List<Organizer> getAllOrganizers() {
         return organizerDAO.findAll();
@@ -40,9 +44,16 @@ public class OrganizerService {
         return organizerDAO.update(organizer);
     }
 
+    @Transactional
     public void deleteOrganizer(Long id) {
         organizerDAO.findById(id)
                 .orElseThrow(() -> new ResourceNotFoundException("Organizer", id));
+
+        List<Event> events = eventDAO.getEventsByOrganizerId(id);
+        if (!events.isEmpty()) {
+            throw new IllegalStateException("Cannot delete organizer with existing events");
+        }
+
         organizerDAO.delete(id);
     }
 }

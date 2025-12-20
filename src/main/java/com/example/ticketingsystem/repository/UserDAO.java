@@ -62,7 +62,17 @@ public class UserDAO {
         return jdbcTemplate.query(query, new RoleRowMapper(), id);
     }
 
-    public User createUser(User user) {
+    public List<String> getUserRoleNames(Long id) {
+        String query = """
+                SELECT r.name
+                FROM user_roles ur
+                JOIN roles r ON r.id = ur.role_id
+                WHERE ur.user_id = ?
+                """;
+        return jdbcTemplate.queryForList(query, String.class, id);
+    }
+
+    public User create(User user) {
         String query = """
                 INSERT INTO users (username, email, password_hash, first_name, last_name)
                 VALUES (?, ?, ?, ?, ?)
@@ -105,6 +115,12 @@ public class UserDAO {
     }
 
     public void assignRole(Long userId, String roleName) {
+        String checkQuery = "SELECT COUNT(*) FROM roles WHERE name = ?";
+        Integer count = jdbcTemplate.queryForObject(checkQuery, Integer.class, roleName);
+        if (count == null || count == 0) {
+            throw new IllegalArgumentException("Role not found: " + roleName);
+        }
+
         String query = """
                 INSERT INTO user_roles (user_id, role_id)
                 SELECT ?, id FROM roles WHERE name = ?

@@ -65,4 +65,19 @@ public class PaymentDAO {
                 """;
         return jdbcTemplate.queryForObject(selectQuery, new PaymentRowMapper(), id);
     }
+
+    public Payment updatePayment(Long id, String status, String externalPaymentId, java.time.LocalDateTime paidAt) {
+        String query = """
+                UPDATE payments
+                SET status = ?, external_payment_id = ?, paid_at = ?
+                WHERE id = ?
+                """;
+        jdbcTemplate.update(query, status, externalPaymentId, paidAt, id);
+        String selectQuery = """
+                SELECT id, order_id, external_payment_id, amount, status, paid_at
+                FROM payments
+                WHERE id = ?
+                """;
+        return jdbcTemplate.queryForObject(selectQuery, new PaymentRowMapper(), id);
+    }
 }

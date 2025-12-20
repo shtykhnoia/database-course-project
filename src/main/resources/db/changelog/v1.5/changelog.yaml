@@ -5,6 +5,10 @@ databaseChangeLog:
       changes:
         - sqlFile:
             path: db/changelog/v1.5/changelog.sql
+            splitStatements: false
+            endDelimiter: ";"
       rollback:
         - sqlFile:
             path: db/changelog/v1.5/rollback.sql
+            splitStatements: false
+            endDelimiter: ";"

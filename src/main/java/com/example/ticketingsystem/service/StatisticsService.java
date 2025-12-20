@@ -1,7 +1,7 @@
 package com.example.ticketingsystem.service;
 
 import com.example.ticketingsystem.model.EventSalesView;
-import com.example.ticketingsystem.model.OrganizerPerformanceView;
+import com.example.ticketingsystem.model.VenueUtilizationView;
 import com.example.ticketingsystem.model.PromoCodeEffectivenessView;
 import com.example.ticketingsystem.repository.StatisticsDAO;
 import lombok.AllArgsConstructor;
@@ -23,12 +23,12 @@ public class StatisticsService {
         return statisticsDAO.getEventSalesByEventId(eventId);
     }
 
-    public List<OrganizerPerformanceView> getOrganizerPerformance() {
-        return statisticsDAO.getOrganizerPerformance();
+    public List<VenueUtilizationView> getVenueUtilization() {
+        return statisticsDAO.getVenueUtilization();
     }
 
-    public OrganizerPerformanceView getOrganizerPerformanceById(Long organizerId) {
-        return statisticsDAO.getOrganizerPerformanceById(organizerId);
+    public VenueUtilizationView getVenueUtilizationById(Long venueId) {
+        return statisticsDAO.getVenueUtilizationById(venueId);
     }
 
     public List<PromoCodeEffectivenessView> getPromoCodeEffectiveness() {

@@ -96,10 +96,7 @@ public class OrderService {
         Payment payment = paymentDAO.findByOrderId(orderId)
                 .orElseThrow(() -> new ResourceNotFoundException("Payment for order", orderId));
 
-        payment.setExternalPaymentId(externalPaymentId);
-        payment.setStatus("succeeded");
-        payment.setPaidAt(LocalDateTime.now());
-        paymentDAO.updateStatus(payment.getId(), "succeeded");
+        paymentDAO.updatePayment(payment.getId(), "succeeded", externalPaymentId, LocalDateTime.now());
 
         order.setStatus("confirmed");
         orderDAO.updateStatus(orderId, "confirmed");
@@ -191,9 +188,15 @@ public class OrderService {
         return allTickets;
     }
 
+    private static final int MAX_TICKETS_PER_ORDER = 10;
+
     private void validateTicketPurchase(TicketCategory category, int quantity) {
         if (quantity <= 0) {
             throw new IllegalArgumentException("Quantity must be positive");
+        }
+
+        if (quantity > MAX_TICKETS_PER_ORDER) {
+            throw new IllegalArgumentException("Cannot purchase more than " + MAX_TICKETS_PER_ORDER + " tickets per order");
         }
 
         if (category.getQuantityAvailable() < quantity) {

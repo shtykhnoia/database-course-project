@@ -12,11 +12,16 @@ import java.math.BigDecimal;
 public class PromoCodeEffectivenessView {
     private Long promoCodeId;
     private String code;
-    private Long eventId;
-    private String eventTitle;
     private String discountType;
     private BigDecimal discountValue;
-    private Integer ordersWithPromo;
+    private Integer maxUses;
+    private Integer usedCount;
+    private Long eventId;
+    private String eventTitle;
+    private Long ordersWithPromo;
+    private BigDecimal totalSalesWithPromo;
     private BigDecimal totalDiscountGiven;
     private BigDecimal avgDiscountPerOrder;
+    private Integer usagePercentage;
+    private String promoStatus;
 }

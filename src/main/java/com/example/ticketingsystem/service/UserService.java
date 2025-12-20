@@ -63,7 +63,7 @@ public class UserService {
         String hashedPassword = passwordEncoder.encode(user.getPasswordHash());
         user.setPasswordHash(hashedPassword);
 
-        User createdUser = userDAO.createUser(user);
+        User createdUser = userDAO.create(user);
 
         userDAO.assignRole(createdUser.getId(), "user");
 

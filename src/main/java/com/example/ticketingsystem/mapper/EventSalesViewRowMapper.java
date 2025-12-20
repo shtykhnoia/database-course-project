@@ -14,11 +14,11 @@ public class EventSalesViewRowMapper implements RowMapper<EventSalesView> {
         view.setEventTitle(rs.getString("event_title"));
         view.setCategoryId(rs.getLong("category_id"));
         view.setCategoryName(rs.getString("category_name"));
-        view.setCategoryPrice(rs.getBigDecimal("category_price"));
-        view.setTotalSold(rs.getInt("total_sold"));
-        view.setQuantityAvailable(rs.getInt("quantity_available"));
-        view.setTotalRevenue(rs.getBigDecimal("total_revenue"));
-        view.setSoldLast7Days(rs.getInt("sold_last_7_days"));
+        view.setTicketsSold(rs.getInt("tickets_sold"));
+        view.setTicketsAvailable(rs.getInt("tickets_available"));
+        view.setAvgTicketPrice(rs.getBigDecimal("avg_ticket_price"));
+        view.setTicketsSoldLast7Days(rs.getInt("tickets_sold_last_7_days"));
+        view.setSoldPercentage(rs.getInt("sold_percentage"));
         return view;
     }
 }

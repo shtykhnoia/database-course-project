@@ -57,4 +57,10 @@ public class OrderItemDAO {
                 """;
         jdbcTemplate.update(query, promoCodeId, orderItemId);
     }
+
+    public int countByTicketCategoryId(Long ticketCategoryId) {
+        String query = "SELECT COUNT(*) FROM order_items WHERE ticket_category_id = ?";
+        Integer count = jdbcTemplate.queryForObject(query, Integer.class, ticketCategoryId);
+        return count != null ? count : 0;
+    }
 }

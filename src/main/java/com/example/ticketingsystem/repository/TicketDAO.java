@@ -45,11 +45,11 @@ public class TicketDAO {
     public int[] batchUpdateStatus(List<Long> ticketIds, String newStatus) {
         String query = "UPDATE tickets SET status = ? WHERE id = ?";
 
-        return jdbcTemplate.batchUpdate(query, ticketIds, ticketIds.size(),
-                (PreparedStatement ps, Long ticketId) -> {
-                    ps.setString(1, newStatus);
-                    ps.setLong(2, ticketId);
-                });
+        List<Object[]> batchArgs = ticketIds.stream()
+                .map(id -> new Object[]{newStatus, id})
+                .toList();
+
+        return jdbcTemplate.batchUpdate(query, batchArgs);
     }
 
     public List<Ticket> findByOrderItemId(Long orderItemId) {

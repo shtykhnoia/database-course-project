@@ -1,7 +1,7 @@
 package com.example.ticketingsystem.controller;
 
 import com.example.ticketingsystem.model.EventSalesView;
-import com.example.ticketingsystem.model.OrganizerPerformanceView;
+import com.example.ticketingsystem.model.VenueUtilizationView;
 import com.example.ticketingsystem.model.PromoCodeEffectivenessView;
 import com.example.ticketingsystem.service.StatisticsService;
 import lombok.AllArgsConstructor;
@@ -26,14 +26,14 @@ public class StatisticsController {
         return ResponseEntity.ok(statisticsService.getEventSales());
     }
 
-    @GetMapping("/organizer-performance")
-    public ResponseEntity<List<OrganizerPerformanceView>> getOrganizerPerformance() {
-        return ResponseEntity.ok(statisticsService.getOrganizerPerformance());
+    @GetMapping("/venue-utilization")
+    public ResponseEntity<List<VenueUtilizationView>> getVenueUtilization() {
+        return ResponseEntity.ok(statisticsService.getVenueUtilization());
     }
 
-    @GetMapping("/organizer-performance/{organizerId}")
-    public ResponseEntity<OrganizerPerformanceView> getOrganizerPerformanceById(@PathVariable Long organizerId) {
-        OrganizerPerformanceView stats = statisticsService.getOrganizerPerformanceById(organizerId);
+    @GetMapping("/venue-utilization/{venueId}")
+    public ResponseEntity<VenueUtilizationView> getVenueUtilizationById(@PathVariable Long venueId) {
+        VenueUtilizationView stats = statisticsService.getVenueUtilizationById(venueId);
         return stats != null ? ResponseEntity.ok(stats) : ResponseEntity.notFound().build();
     }
 
