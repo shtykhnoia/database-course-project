@@ -6,6 +6,9 @@ import com.example.ticketingsystem.dto.auth.RegisterRequest;
 import com.example.ticketingsystem.model.User;
 import com.example.ticketingsystem.repository.UserDAO;
 import com.example.ticketingsystem.security.JwtUtil;
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.responses.ApiResponse;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.crypto.password.PasswordEncoder;
@@ -18,6 +21,7 @@ import java.util.List;
 
 @RestController
 @RequestMapping("/api/auth")
+@Tag(name = "Аутентификация", description = "Регистрация и вход пользователей")
 public class AuthController {
 
     private final UserDAO userDAO;
@@ -31,6 +35,10 @@ public class AuthController {
     }
 
     @PostMapping("/register")
+    @Operation(summary = "Регистрация нового пользователя",
+               description = "Создает нового пользователя с ролью USER и возвращает JWT токен")
+    @ApiResponse(responseCode = "200", description = "Пользователь успешно зарегистрирован")
+    @ApiResponse(responseCode = "400", description = "Имя пользователя или email уже существует")
     public ResponseEntity<?> register(@Valid @RequestBody RegisterRequest request) {
         if (userDAO.findByUsername(request.getUsername()).isPresent()) {
             return ResponseEntity.badRequest().body("Username already exists");
@@ -57,6 +65,10 @@ public class AuthController {
     }
 
     @PostMapping("/login")
+    @Operation(summary = "Вход в систему",
+               description = "Аутентифицирует пользователя и возвращает JWT токен для доступа к защищенным эндпоинтам")
+    @ApiResponse(responseCode = "200", description = "Успешный вход")
+    @ApiResponse(responseCode = "401", description = "Неверные учетные данные")
     public ResponseEntity<?> login(@Valid @RequestBody LoginRequest request) {
         User user = userDAO.findByUsername(request.getUsername())
                 .orElse(null);

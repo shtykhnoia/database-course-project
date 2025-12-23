@@ -5,6 +5,11 @@ import com.example.ticketingsystem.dto.request.TicketCategoryRequest;
 import com.example.ticketingsystem.dto.response.TicketCategoryResponse;
 import com.example.ticketingsystem.model.TicketCategory;
 import com.example.ticketingsystem.service.TicketCategoryService;
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.Parameter;
+import io.swagger.v3.oas.annotations.responses.ApiResponse;
+import io.swagger.v3.oas.annotations.security.SecurityRequirement;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -15,6 +20,7 @@ import java.util.stream.Collectors;
 
 @RestController
 @RequestMapping("/api")
+@Tag(name = "Категории билетов", description = "Управление категориями билетов для мероприятий")
 public class TicketCategoryController {
 
     private final TicketCategoryService ticketCategoryService;
@@ -27,15 +33,25 @@ public class TicketCategoryController {
     }
 
     @GetMapping("/events/{eventId}/tickets")
-    public List<TicketCategoryResponse> getTicketCategoriesByEvent(@PathVariable Long eventId) {
+    @Operation(summary = "Получить категории билетов мероприятия",
+               description = "Возвращает все доступные категории билетов для конкретного мероприятия (публичный доступ)")
+    @ApiResponse(responseCode = "200", description = "Список категорий билетов")
+    public List<TicketCategoryResponse> getTicketCategoriesByEvent(
+            @Parameter(description = "ID мероприятия") @PathVariable Long eventId) {
         return ticketCategoryService.getTicketCategoriesByEventId(eventId).stream()
                 .map(TicketCategoryResponse::new)
                 .collect(Collectors.toList());
     }
 
     @PostMapping("/events/{eventId}/tickets")
+    @Operation(summary = "Создать категорию билетов",
+               description = "Создает новую категорию билетов для мероприятия (требуется роль ORGANIZER или ADMIN)")
+    @SecurityRequirement(name = "bearerAuth")
+    @ApiResponse(responseCode = "201", description = "Категория создана")
+    @ApiResponse(responseCode = "400", description = "Некорректные данные")
+    @ApiResponse(responseCode = "403", description = "Недостаточно прав")
     public ResponseEntity<TicketCategoryResponse> createTicketCategory(
-            @PathVariable Long eventId,
+            @Parameter(description = "ID мероприятия") @PathVariable Long eventId,
             @Valid @RequestBody TicketCategoryRequest request) {
 
         TicketCategory ticketCategory = ticketCategoryMapper.toEntity(request, eventId);
@@ -45,15 +61,26 @@ public class TicketCategoryController {
     }
 
     @GetMapping("/tickets/{id}")
-    public ResponseEntity<TicketCategoryResponse> getTicketCategoryById(@PathVariable Long id) {
+    @Operation(summary = "Получить категорию билетов по ID",
+               description = "Возвращает детальную информацию о категории билетов (публичный доступ)")
+    @ApiResponse(responseCode = "200", description = "Категория найдена")
+    @ApiResponse(responseCode = "404", description = "Категория не найдена")
+    public ResponseEntity<TicketCategoryResponse> getTicketCategoryById(
+            @Parameter(description = "ID категории билетов") @PathVariable Long id) {
         return ticketCategoryService.getTicketCategoryById(id)
                 .map(tc -> ResponseEntity.ok(new TicketCategoryResponse(tc)))
                 .orElse(ResponseEntity.notFound().build());
     }
 
     @PutMapping("/tickets/{id}")
+    @Operation(summary = "Обновить категорию билетов",
+               description = "Обновляет категорию билетов (цена, количество, даты продаж). Требуется роль ORGANIZER или ADMIN")
+    @SecurityRequirement(name = "bearerAuth")
+    @ApiResponse(responseCode = "200", description = "Категория обновлена")
+    @ApiResponse(responseCode = "404", description = "Категория не найдена")
+    @ApiResponse(responseCode = "403", description = "Недостаточно прав")
     public ResponseEntity<TicketCategoryResponse> updateTicketCategory(
-            @PathVariable Long id,
+            @Parameter(description = "ID категории билетов") @PathVariable Long id,
             @Valid @RequestBody TicketCategoryRequest request) {
 
         TicketCategory existing = ticketCategoryService.getTicketCategoryById(id)
@@ -66,7 +93,14 @@ public class TicketCategoryController {
     }
 
     @DeleteMapping("/tickets/{id}")
-    public ResponseEntity<Void> deleteTicketCategory(@PathVariable Long id) {
+    @Operation(summary = "Удалить категорию билетов",
+               description = "Удаляет категорию билетов (требуется роль ORGANIZER или ADMIN)")
+    @SecurityRequirement(name = "bearerAuth")
+    @ApiResponse(responseCode = "204", description = "Категория удалена")
+    @ApiResponse(responseCode = "404", description = "Категория не найдена")
+    @ApiResponse(responseCode = "403", description = "Недостаточно прав")
+    public ResponseEntity<Void> deleteTicketCategory(
+            @Parameter(description = "ID категории билетов") @PathVariable Long id) {
         ticketCategoryService.deleteTicketCategory(id);
         return ResponseEntity.noContent().build();
     }

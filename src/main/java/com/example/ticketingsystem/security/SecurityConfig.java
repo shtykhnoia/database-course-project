@@ -30,18 +30,27 @@ public class SecurityConfig {
                 .csrf(AbstractHttpConfigurer::disable)
                 .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
                 .authorizeHttpRequests(auth -> auth
+                        .requestMatchers("/swagger-ui/**", "/swagger-ui.html", "/v3/api-docs/**", "/swagger-resources/**", "/webjars/**").permitAll()
                         .requestMatchers("/api/auth/**").permitAll()
                         .requestMatchers(HttpMethod.GET, "/api/events/**").permitAll()
                         .requestMatchers(HttpMethod.GET, "/api/venues/**").permitAll()
                         .requestMatchers(HttpMethod.GET, "/api/organizers/**").permitAll()
 
                         .requestMatchers("/api/users/**").hasAuthority("ROLE_ADMIN")
-                        .requestMatchers(HttpMethod.DELETE, "/api/**").hasAnyAuthority("ROLE_ADMIN", "ROLE_ORGANIZER")
 
+                        // Управление организаторами - только ADMIN
+                        .requestMatchers(HttpMethod.POST, "/api/organizers/**").hasAuthority("ROLE_ADMIN")
+                        .requestMatchers(HttpMethod.PUT, "/api/organizers/**").hasAuthority("ROLE_ADMIN")
+                        .requestMatchers(HttpMethod.DELETE, "/api/organizers/**").hasAuthority("ROLE_ADMIN")
+
+                        // Мероприятия - ORGANIZER и ADMIN
                         .requestMatchers(HttpMethod.POST, "/api/events/**").hasAnyAuthority("ROLE_ADMIN", "ROLE_ORGANIZER")
                         .requestMatchers(HttpMethod.PUT, "/api/events/**").hasAnyAuthority("ROLE_ADMIN", "ROLE_ORGANIZER")
-                        .requestMatchers(HttpMethod.POST, "/api/organizers/**").hasAnyAuthority("ROLE_ADMIN", "ROLE_ORGANIZER")
-                        .requestMatchers(HttpMethod.PUT, "/api/organizers/**").hasAnyAuthority("ROLE_ADMIN", "ROLE_ORGANIZER")
+                        .requestMatchers(HttpMethod.PATCH, "/api/events/**").hasAnyAuthority("ROLE_ADMIN", "ROLE_ORGANIZER")
+                        .requestMatchers(HttpMethod.DELETE, "/api/events/**").hasAnyAuthority("ROLE_ADMIN", "ROLE_ORGANIZER")
+
+                        // Остальные DELETE - ORGANIZER и ADMIN
+                        .requestMatchers(HttpMethod.DELETE, "/api/**").hasAnyAuthority("ROLE_ADMIN", "ROLE_ORGANIZER")
 
                         .requestMatchers("/api/orders/**").authenticated()
                         .requestMatchers("/api/tickets/**").authenticated()
