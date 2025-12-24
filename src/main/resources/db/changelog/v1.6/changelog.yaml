@@ -1,0 +1,11 @@
+databaseChangeLog:
+  - changeSet:
+      id: 1.6-optimize-indexes
+      author: ilya
+      comment: Remove inefficient indexes based on EXPLAIN ANALYZE results
+      changes:
+        - sqlFile:
+            path: db/changelog/v1.6/changelog.sql
+      rollback:
+        - sqlFile:
+            path: db/changelog/v1.6/rollback.sql

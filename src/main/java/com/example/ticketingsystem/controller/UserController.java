@@ -87,7 +87,7 @@ public class UserController {
             @Parameter(description = "ID пользователя") @PathVariable Long id,
             @Valid @RequestBody UserRequest request) {
         User user = userMapper.toEntity(request);
-        User updatedUser = userService.updateUser(id, user);
+        userService.updateUser(id, user);
         return userService.getUserWithRoles(id)
                 .map(ResponseEntity::ok)
                 .orElse(ResponseEntity.notFound().build());
