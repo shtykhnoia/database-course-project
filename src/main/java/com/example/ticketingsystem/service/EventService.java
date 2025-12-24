@@ -2,9 +2,12 @@ package com.example.ticketingsystem.service;
 
 import com.example.ticketingsystem.exception.ResourceNotFoundException;
 import com.example.ticketingsystem.model.Event;
+import com.example.ticketingsystem.model.Order;
 import com.example.ticketingsystem.model.Ticket;
 import com.example.ticketingsystem.repository.EventDAO;
+import com.example.ticketingsystem.repository.OrderDAO;
 import com.example.ticketingsystem.repository.TicketDAO;
+import org.springframework.context.annotation.Lazy;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -16,10 +19,14 @@ public class EventService {
 
     private final EventDAO eventDAO;
     private final TicketDAO ticketDAO;
+    private final OrderDAO orderDAO;
+    private final OrderService orderService;
 
-    public EventService(EventDAO eventDAO, TicketDAO ticketDAO) {
+    public EventService(EventDAO eventDAO, TicketDAO ticketDAO, OrderDAO orderDAO, @Lazy OrderService orderService) {
         this.eventDAO = eventDAO;
         this.ticketDAO = ticketDAO;
+        this.orderDAO = orderDAO;
+        this.orderService = orderService;
     }
 
     public List<Event> getAllEvents() {
@@ -81,15 +88,12 @@ public class EventService {
             );
         }
 
-        eventDAO.updateEventStatus(eventId, "cancelled");
-
-        List<Ticket> tickets = ticketDAO.findByEventId(eventId);
-        if (!tickets.isEmpty()) {
-            List<Long> ticketIds = tickets.stream()
-                    .map(Ticket::getId)
-                    .toList();
-            ticketDAO.batchUpdateStatus(ticketIds, "cancelled");
+        List<Order> pendingOrders = orderDAO.findByEventIdAndStatus(eventId, "pending");
+        for (Order order : pendingOrders) {
+            orderService.cancelOrder(order.getId());
         }
+
+        eventDAO.updateEventStatus(eventId, "cancelled");
     }
 
     @Transactional
@@ -100,6 +104,14 @@ public class EventService {
         int orderCount = eventDAO.countOrdersByEventId(id);
         if (orderCount > 0) {
             throw new IllegalStateException("Cannot delete event with existing orders");
+        }
+
+        List<Ticket> tickets = ticketDAO.findByEventId(id);
+        if (!tickets.isEmpty()) {
+            List<Long> ticketIds = tickets.stream()
+                    .map(Ticket::getId)
+                    .toList();
+            ticketDAO.batchUpdateStatus(ticketIds, "cancelled");
         }
 
         eventDAO.deleteEvent(id);

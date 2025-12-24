@@ -42,6 +42,25 @@ public class TicketDAO {
         return ticket;
     }
 
+    public int[] batchCreate(List<Ticket> tickets) {
+        String query = """
+                INSERT INTO tickets (ticket_code, order_item_id, attendee_name, attendee_email, status)
+                VALUES (?, ?, ?, ?, ?)
+                """;
+
+        List<Object[]> batchArgs = tickets.stream()
+                .map(ticket -> new Object[]{
+                        ticket.getTicketCode(),
+                        ticket.getOrderItemId(),
+                        ticket.getAttendeeName(),
+                        ticket.getAttendeeEmail(),
+                        ticket.getStatus()
+                })
+                .toList();
+
+        return jdbcTemplate.batchUpdate(query, batchArgs);
+    }
+
     public int[] batchUpdateStatus(List<Long> ticketIds, String newStatus) {
         String query = "UPDATE tickets SET status = ? WHERE id = ?";
 

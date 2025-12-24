@@ -102,8 +102,18 @@ public class OrderService {
         orderDAO.updateStatus(orderId, "confirmed");
 
         List<OrderItem> orderItems = orderItemDAO.findByOrderId(orderId);
+        List<Ticket> ticketsToCreate = new ArrayList<>();
         for (OrderItem item : orderItems) {
-            generateTickets(item);
+            for (int i = 0; i < item.getQuantity(); i++) {
+                Ticket ticket = new Ticket();
+                ticket.setTicketCode(generateTicketCode());
+                ticket.setOrderItemId(item.getId());
+                ticket.setStatus("active");
+                ticketsToCreate.add(ticket);
+            }
+        }
+        if (!ticketsToCreate.isEmpty()) {
+            ticketDAO.batchCreate(ticketsToCreate);
         }
 
         return order;
@@ -210,16 +220,6 @@ public class OrderService {
 
         if (category.getSaleEndDate() != null && now.isAfter(category.getSaleEndDate())) {
             throw new IllegalArgumentException("Ticket sales have ended");
-        }
-    }
-
-    private void generateTickets(OrderItem orderItem) {
-        for (int i = 0; i < orderItem.getQuantity(); i++) {
-            Ticket ticket = new Ticket();
-            ticket.setTicketCode(generateTicketCode());
-            ticket.setOrderItemId(orderItem.getId());
-            ticket.setStatus("active");
-            ticketDAO.create(ticket);
         }
     }
 

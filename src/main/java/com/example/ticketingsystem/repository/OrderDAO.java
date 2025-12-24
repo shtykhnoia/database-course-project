@@ -102,4 +102,16 @@ public class OrderDAO {
         jdbcTemplate.update(query, newPrice, orderId);
         return findById(orderId).orElseThrow();
     }
+
+    public List<Order> findByEventIdAndStatus(Long eventId, String status) {
+        String query = """
+                SELECT DISTINCT o.id, o.order_number, o.user_id, o.status, o.total_amount, o.created_at
+                FROM orders o
+                JOIN order_items oi ON o.id = oi.order_id
+                JOIN ticket_categories tc ON oi.ticket_category_id = tc.id
+                WHERE tc.event_id = ? AND o.status = ?
+                ORDER BY o.created_at DESC
+                """;
+        return jdbcTemplate.query(query, new OrderRowMapper(), eventId, status);
+    }
 }
