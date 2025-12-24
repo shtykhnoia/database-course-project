@@ -34,14 +34,28 @@ public class OrderController {
 
     @GetMapping
     @Operation(summary = "Получить все заказы",
-               description = "Возвращает список всех заказов, можно фильтровать по статусу")
+               description = "Возвращает список всех заказов, можно фильтровать по статусу. Поддерживает пагинацию.")
     @ApiResponse(responseCode = "200", description = "Список заказов")
-    public ResponseEntity<List<OrderResponse>> getAllOrders(@Parameter(description = "Статус заказа (pending, confirmed, cancelled)") @RequestParam(required = false) String status) {
+    public ResponseEntity<List<OrderResponse>> getAllOrders(
+            @Parameter(description = "Статус заказа (pending, confirmed, cancelled)") @RequestParam(required = false) String status,
+            @Parameter(description = "Номер страницы (начиная с 0)") @RequestParam(defaultValue = "0") int page,
+            @Parameter(description = "Размер страницы (максимум 100)") @RequestParam(defaultValue = "20") int size) {
+
+        if (size > 100) {
+            size = 100;
+        }
+        if (size < 1) {
+            size = 20;
+        }
+        if (page < 0) {
+            page = 0;
+        }
+
         List<Order> orders;
         if (status != null) {
-            orders = orderService.getOrdersByStatus(status);
+            orders = orderService.getOrdersByStatus(status, page, size);
         } else {
-            orders = orderService.getAllOrders();
+            orders = orderService.getAllOrders(page, size);
         }
         List<OrderResponse> responses = orders.stream()
                 .map(OrderResponse::new)

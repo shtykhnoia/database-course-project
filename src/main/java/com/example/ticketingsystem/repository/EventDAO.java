@@ -31,8 +31,27 @@ public class EventDAO {
                 end_datetime,
                 event_status
                 FROM events
+                ORDER BY start_datetime DESC
                 """;
         return jdbcTemplate.query(query, new EventRowMapper());
+    }
+
+    public List<Event> getAllEvents(int page, int size) {
+        String query = """
+                SELECT id,
+                title,
+                description,
+                organizer_id,
+                venue_id,
+                start_datetime,
+                end_datetime,
+                event_status
+                FROM events
+                ORDER BY start_datetime DESC
+                LIMIT ? OFFSET ?
+                """;
+        int offset = page * size;
+        return jdbcTemplate.query(query, new EventRowMapper(), size, offset);
     }
 
     public Optional<Event> getEventById(Long id) {

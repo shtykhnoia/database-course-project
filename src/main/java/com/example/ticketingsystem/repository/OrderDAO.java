@@ -63,6 +63,17 @@ public class OrderDAO {
         return jdbcTemplate.query(query, new OrderRowMapper());
     }
 
+    public List<Order> findAll(int page, int size) {
+        String query = """
+                SELECT id, order_number, user_id, status, total_amount, created_at
+                FROM orders
+                ORDER BY created_at DESC
+                LIMIT ? OFFSET ?
+                """;
+        int offset = page * size;
+        return jdbcTemplate.query(query, new OrderRowMapper(), size, offset);
+    }
+
     public List<Order> findByUserId(Long userId) {
         String query = """
                 SELECT id, order_number, user_id, status, total_amount, created_at
@@ -81,6 +92,18 @@ public class OrderDAO {
                 ORDER BY created_at DESC
                 """;
         return jdbcTemplate.query(query, new OrderRowMapper(), status);
+    }
+
+    public List<Order> findByStatus(String status, int page, int size) {
+        String query = """
+                SELECT id, order_number, user_id, status, total_amount, created_at
+                FROM orders
+                WHERE status = ?
+                ORDER BY created_at DESC
+                LIMIT ? OFFSET ?
+                """;
+        int offset = page * size;
+        return jdbcTemplate.query(query, new OrderRowMapper(), status, size, offset);
     }
 
     public Order updateStatus(Long id, String status) {

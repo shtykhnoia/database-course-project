@@ -11,6 +11,7 @@ import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
+import lombok.AllArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -21,16 +22,11 @@ import java.util.stream.Collectors;
 @RestController
 @RequestMapping("/api")
 @Tag(name = "Категории билетов", description = "Управление категориями билетов для мероприятий")
+@AllArgsConstructor
 public class TicketCategoryController {
 
     private final TicketCategoryService ticketCategoryService;
     private final TicketCategoryMapper ticketCategoryMapper;
-
-    public TicketCategoryController(TicketCategoryService ticketCategoryService,
-                                   TicketCategoryMapper ticketCategoryMapper) {
-        this.ticketCategoryService = ticketCategoryService;
-        this.ticketCategoryMapper = ticketCategoryMapper;
-    }
 
     @GetMapping("/events/{eventId}/tickets")
     @Operation(summary = "Получить категории билетов мероприятия",

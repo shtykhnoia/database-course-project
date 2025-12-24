@@ -48,8 +48,26 @@ public class UserDAO {
                 last_name,
                 created_at
                 FROM users
+                ORDER BY created_at DESC
                 """;
         return jdbcTemplate.query(query, new UserRowMapper());
+    }
+
+    public List<User> getAllUsers(int page, int size) {
+        String query = """
+                SELECT id,
+                username,
+                email,
+                password_hash,
+                first_name,
+                last_name,
+                created_at
+                FROM users
+                ORDER BY created_at DESC
+                LIMIT ? OFFSET ?
+                """;
+        int offset = page * size;
+        return jdbcTemplate.query(query, new UserRowMapper(), size, offset);
     }
 
     public List<Role> getUserRoles(Long id) {

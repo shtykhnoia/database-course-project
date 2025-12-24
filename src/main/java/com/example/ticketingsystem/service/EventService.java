@@ -33,6 +33,10 @@ public class EventService {
         return eventDAO.getAllEvents();
     }
 
+    public List<Event> getAllEvents(int page, int size) {
+        return eventDAO.getAllEvents(page, size);
+    }
+
     public Optional<Event> getEventById(Long id) {
         return eventDAO.getEventById(id);
     }

@@ -20,7 +20,6 @@ public class EventTagService {
 
     @Transactional
     public EventTag createEventTag(EventTag eventTag) {
-        // Проверка на дубликат по имени
         eventTagDAO.findByName(eventTag.getName()).ifPresent(existing -> {
             throw new DuplicateResourceException("Event tag with name '" + eventTag.getName() + "' already exists");
         });
@@ -50,7 +49,6 @@ public class EventTagService {
 
     @Transactional
     public void assignTagToEvent(Long eventId, Long tagId) {
-        // Проверяем что тег существует
         getEventTagById(tagId);
         eventTagDAO.assignTagToEvent(eventId, tagId);
     }

@@ -34,11 +34,24 @@ public class UserController {
     }
 
     @GetMapping
-    @Operation(summary = "Получить всех пользователей", description = "Возвращает список всех пользователей системы")
+    @Operation(summary = "Получить всех пользователей", description = "Возвращает список всех пользователей системы. Поддерживает пагинацию.")
     @ApiResponse(responseCode = "200", description = "Список пользователей")
     @ApiResponse(responseCode = "403", description = "Требуется роль ADMIN")
-    public List<User> getAllUsers() {
-        return userService.getAllUsers();
+    public List<User> getAllUsers(
+            @Parameter(description = "Номер страницы (начиная с 0)") @RequestParam(defaultValue = "0") int page,
+            @Parameter(description = "Размер страницы (максимум 100)") @RequestParam(defaultValue = "20") int size) {
+
+        if (size > 100) {
+            size = 100;
+        }
+        if (size < 1) {
+            size = 20;
+        }
+        if (page < 0) {
+            page = 0;
+        }
+
+        return userService.getAllUsers(page, size);
     }
 
     @GetMapping("/{id}")

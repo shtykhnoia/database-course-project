@@ -176,12 +176,20 @@ public class OrderService {
         return orderDAO.findAll();
     }
 
+    public List<Order> getAllOrders(int page, int size) {
+        return orderDAO.findAll(page, size);
+    }
+
     public List<Order> getUserOrders(Long userId) {
         return orderDAO.findByUserId(userId);
     }
 
     public List<Order> getOrdersByStatus(String status) {
         return orderDAO.findByStatus(status);
+    }
+
+    public List<Order> getOrdersByStatus(String status, int page, int size) {
+        return orderDAO.findByStatus(status, page, size);
     }
 
     public List<Ticket> getOrderTickets(Long orderId) {

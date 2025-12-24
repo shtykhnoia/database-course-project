@@ -50,6 +50,10 @@ public class UserService {
         return userDAO.getAllUsers();
     }
 
+    public List<User> getAllUsers(int page, int size) {
+        return userDAO.getAllUsers(page, size);
+    }
+
     @Transactional
     public User createUser(User user) {
         if (userDAO.findByEmail(user.getEmail()).isPresent()) {

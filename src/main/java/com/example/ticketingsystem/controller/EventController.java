@@ -33,9 +33,22 @@ public class EventController {
     }
 
     @GetMapping
-    @Operation(summary = "Получить все мероприятия", description = "Возвращает список всех мероприятий (публичный доступ)")
-    public List<EventResponse> getAllEvents() {
-        return eventService.getAllEvents().stream()
+    @Operation(summary = "Получить все мероприятия", description = "Возвращает список всех мероприятий (публичный доступ). Поддерживает пагинацию.")
+    public List<EventResponse> getAllEvents(
+            @Parameter(description = "Номер страницы (начиная с 0)") @RequestParam(defaultValue = "0") int page,
+            @Parameter(description = "Размер страницы (максимум 100)") @RequestParam(defaultValue = "20") int size) {
+
+        if (size > 100) {
+            size = 100;
+        }
+        if (size < 1) {
+            size = 20;
+        }
+        if (page < 0) {
+            page = 0;
+        }
+
+        return eventService.getAllEvents(page, size).stream()
                 .map(EventResponse::new)
                 .collect(Collectors.toList());
     }
