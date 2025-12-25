@@ -172,10 +172,6 @@ public class OrderService {
                 .orElseThrow(() -> new ResourceNotFoundException("Order", orderId));
     }
 
-    public List<Order> getAllOrders() {
-        return orderDAO.findAll();
-    }
-
     public List<Order> getAllOrders(int page, int size) {
         return orderDAO.findAll(page, size);
     }
@@ -184,9 +180,6 @@ public class OrderService {
         return orderDAO.findByUserId(userId);
     }
 
-    public List<Order> getOrdersByStatus(String status) {
-        return orderDAO.findByStatus(status);
-    }
 
     public List<Order> getOrdersByStatus(String status, int page, int size) {
         return orderDAO.findByStatus(status, page, size);

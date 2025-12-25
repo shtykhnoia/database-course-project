@@ -14,10 +14,10 @@ import java.util.List;
 @Component
 public class JwtUtil {
 
-    @Value("${JWT_SECRET:very-secret-key-that-is-at-least-256-bits-long-for-hs256-algorithm}")
+    @Value("${JWT_SECRET}")
     private String secret;
 
-    @Value("${JWT_EXPIRATION:86400000}")
+    @Value("${JWT_EXPIRATION}")
     private Long expiration;
 
     private SecretKey getSigningKey() {

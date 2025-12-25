@@ -82,7 +82,6 @@ public class EventTagDAO {
         return jdbcTemplate.update(query, id);
     }
 
-    // Управление связями Many-to-Many
     public void assignTagToEvent(Long eventId, Long tagId) {
         String query = """
                 INSERT INTO event_tag_assignments (event_id, tag_id)
@@ -100,8 +99,4 @@ public class EventTagDAO {
         return jdbcTemplate.update(query, eventId, tagId);
     }
 
-    public void removeAllTagsFromEvent(Long eventId) {
-        String query = "DELETE FROM event_tag_assignments WHERE event_id = ?";
-        jdbcTemplate.update(query, eventId);
-    }
 }

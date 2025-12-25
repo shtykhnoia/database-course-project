@@ -150,16 +150,6 @@ public class EventDAO {
         return jdbcTemplate.query(query, new EventRowMapper(), status);
     }
 
-    public List<Event> getEventsByTicketCategoryId(Long ticketCategoryId) {
-        String query = """
-                SELECT e.id, e.title, e.description, e.organizer_id, e.start_datetime, e.event_status, e.venue_id, e.end_datetime
-                FROM events e
-                JOIN ticket_categories tc ON e.id = tc.event_id
-                WHERE tc.id = ?
-                """;
-        return jdbcTemplate.query(query, new EventRowMapper(), ticketCategoryId);
-    }
-
     public int countConfirmedOrdersByEventId(Long eventId) {
         String query = """
                 SELECT COUNT(*) FROM orders o

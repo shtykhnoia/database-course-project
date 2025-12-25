@@ -3,6 +3,8 @@ package com.example.ticketingsystem.controller;
 import com.example.ticketingsystem.dto.auth.AuthResponse;
 import com.example.ticketingsystem.dto.auth.LoginRequest;
 import com.example.ticketingsystem.dto.auth.RegisterRequest;
+import com.example.ticketingsystem.exception.DuplicateResourceException;
+import com.example.ticketingsystem.exception.UnauthorizedException;
 import com.example.ticketingsystem.model.User;
 import com.example.ticketingsystem.repository.UserDAO;
 import com.example.ticketingsystem.security.JwtUtil;
@@ -36,16 +38,16 @@ public class AuthController {
 
     @PostMapping("/register")
     @Operation(summary = "Регистрация нового пользователя",
-               description = "Создает нового пользователя с ролью USER и возвращает JWT токен")
+            description = "Создает нового пользователя с ролью USER и возвращает JWT токен")
     @ApiResponse(responseCode = "200", description = "Пользователь успешно зарегистрирован")
-    @ApiResponse(responseCode = "400", description = "Имя пользователя или email уже существует")
-    public ResponseEntity<?> register(@Valid @RequestBody RegisterRequest request) {
+    @ApiResponse(responseCode = "409", description = "Имя пользователя или email уже существует")
+    public ResponseEntity<AuthResponse> register(@Valid @RequestBody RegisterRequest request) {
         if (userDAO.findByUsername(request.getUsername()).isPresent()) {
-            return ResponseEntity.badRequest().body("Username already exists");
+            throw new DuplicateResourceException("Username", request.getUsername());
         }
 
         if (userDAO.findByEmail(request.getEmail()).isPresent()) {
-            return ResponseEntity.badRequest().body("Email already exists");
+            throw new DuplicateResourceException("Email", request.getEmail());
         }
 
         User user = new User();
@@ -66,15 +68,15 @@ public class AuthController {
 
     @PostMapping("/login")
     @Operation(summary = "Вход в систему",
-               description = "Аутентифицирует пользователя и возвращает JWT токен для доступа к защищенным эндпоинтам")
+            description = "Аутентифицирует пользователя и возвращает JWT токен для доступа к защищенным эндпоинтам")
     @ApiResponse(responseCode = "200", description = "Успешный вход")
     @ApiResponse(responseCode = "401", description = "Неверные учетные данные")
-    public ResponseEntity<?> login(@Valid @RequestBody LoginRequest request) {
+    public ResponseEntity<AuthResponse> login(@Valid @RequestBody LoginRequest request) {
         User user = userDAO.findByUsername(request.getUsername())
-                .orElse(null);
+                .orElseThrow(() -> new UnauthorizedException("Invalid credentials"));
 
-        if (user == null || !passwordEncoder.matches(request.getPassword(), user.getPasswordHash())) {
-            return ResponseEntity.status(401).body("Invalid credentials");
+        if (!passwordEncoder.matches(request.getPassword(), user.getPasswordHash())) {
+            throw new UnauthorizedException("Invalid credentials");
         }
 
         List<String> roleNames = userDAO.getUserRoleNames(user.getId());

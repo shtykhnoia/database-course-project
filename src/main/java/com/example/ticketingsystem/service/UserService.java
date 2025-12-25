@@ -25,10 +25,6 @@ public class UserService {
         this.passwordEncoder = new BCryptPasswordEncoder();
     }
 
-    public Optional<User> getUserById(Long id) {
-        return userDAO.getUserById(id);
-    }
-
     public Optional<UserResponse> getUserWithRoles(Long id) {
         Optional<User> userOpt = userDAO.getUserById(id);
         if (userOpt.isEmpty()) {
@@ -44,10 +40,6 @@ public class UserService {
 
         UserResponse response = new UserResponse(user, roleNames);
         return Optional.of(response);
-    }
-
-    public List<User> getAllUsers() {
-        return userDAO.getAllUsers();
     }
 
     public List<User> getAllUsers(int page, int size) {

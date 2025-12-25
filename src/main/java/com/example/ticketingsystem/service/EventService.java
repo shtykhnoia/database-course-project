@@ -7,7 +7,7 @@ import com.example.ticketingsystem.model.Ticket;
 import com.example.ticketingsystem.repository.EventDAO;
 import com.example.ticketingsystem.repository.OrderDAO;
 import com.example.ticketingsystem.repository.TicketDAO;
-import org.springframework.context.annotation.Lazy;
+import lombok.AllArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -15,23 +15,13 @@ import java.util.List;
 import java.util.Optional;
 
 @Service
+@AllArgsConstructor
 public class EventService {
 
     private final EventDAO eventDAO;
     private final TicketDAO ticketDAO;
     private final OrderDAO orderDAO;
     private final OrderService orderService;
-
-    public EventService(EventDAO eventDAO, TicketDAO ticketDAO, OrderDAO orderDAO, @Lazy OrderService orderService) {
-        this.eventDAO = eventDAO;
-        this.ticketDAO = ticketDAO;
-        this.orderDAO = orderDAO;
-        this.orderService = orderService;
-    }
-
-    public List<Event> getAllEvents() {
-        return eventDAO.getAllEvents();
-    }
 
     public List<Event> getAllEvents(int page, int size) {
         return eventDAO.getAllEvents(page, size);
